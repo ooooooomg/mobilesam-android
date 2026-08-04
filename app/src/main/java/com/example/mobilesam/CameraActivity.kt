@@ -112,13 +112,21 @@ class CameraActivity : AppCompatActivity() {
     /** Compute the on-screen rects of the top/bottom bars for frost blur. */
     private fun updateFrostRegions() {
         val regions = ArrayList<RectF>()
+        val root = findViewById<View>(R.id.cameraRoot)
+        val rootLoc = IntArray(2)
+        root.getLocationOnScreen(rootLoc)
         fun barRect(v: View): RectF? {
             if (v.width <= 0 || v.height <= 0) return null
             val loc = IntArray(2)
             v.getLocationOnScreen(loc)
-            // Overlay is full-screen in the same window, so screen == local coords.
-            return RectF(loc[0].toFloat(), loc[1].toFloat(),
-                (loc[0] + v.width).toFloat(), (loc[1] + v.height).toFloat())
+            // Convert to root-local coords (the overlay fills the root), so the
+            // regions are immune to status-bar / window offsets.
+            return RectF(
+                (loc[0] - rootLoc[0]).toFloat(),
+                (loc[1] - rootLoc[1]).toFloat(),
+                (loc[0] - rootLoc[0] + v.width).toFloat(),
+                (loc[1] - rootLoc[1] + v.height).toFloat(),
+            )
         }
         barRect(topBar)?.let { regions.add(it) }
         barRect(findViewById<View>(R.id.tabBar))?.let { regions.add(it) }
@@ -475,6 +483,7 @@ class OverlayView @JvmOverloads constructor(
     private var overlay: Bitmap? = null
     private val paint = Paint().apply { isFilterBitmap = true }
     private val frostPaint = Paint().apply { isFilterBitmap = true }
+    private val appCornerPx = resources.getDimension(R.dimen.app_corner)
 
     /** Screen-space regions (top bar / bottom bar) that get a frosted-glass blur. */
     private var frostRegions: List<android.graphics.RectF> = emptyList()
@@ -545,12 +554,23 @@ class OverlayView @JvmOverloads constructor(
                         Bitmap.createBitmap(bmp, si.left, si.top, si.width(), si.height()),
                         tw, th, true,
                     )
+                    // Clip to the capsule's rounded corners so the frosted
+                    // region never shows a hard square edge around the bar.
+                    val save = canvas.save()
+                    val clipPath = android.graphics.Path().apply {
+                        addRoundRect(
+                            RectF(ir.left, ir.top, ir.right, ir.bottom),
+                            appCornerPx, appCornerPx, android.graphics.Path.Direction.CW,
+                        )
+                    }
+                    canvas.clipPath(clipPath)
                     canvas.drawBitmap(
                         small,
                         Rect(0, 0, tw, th),
                         RectF(ir.left, ir.top, ir.right, ir.bottom),
                         frostPaint,
                     )
+                    canvas.restoreToCount(save)
                     small.recycle()
                 }
             }

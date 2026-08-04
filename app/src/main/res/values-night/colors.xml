@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark palette: near-black + bright sky-blue accent -->
-    <color name="primary">#90CAF9</color>
-    <color name="on_primary">#0D47A1</color>
+    <!-- Dark palette: near-black + blue accent -->
+    <color name="primary">#64B5F6</color>
+    <color name="on_primary">#0D3C78</color>
     <color name="primary_container">#1565C0</color>
     <color name="on_primary_container">#BBDEFB</color>
     <color name="secondary">#9AA0A6</color>
@@ -24,14 +24,14 @@
     <!-- App-wide tokens (dark) -->
     <color name="bg_top">#0A0F14</color>
     <color name="bg_bottom">#11161F</color>
-    <color name="accent">#90CAF9</color>
-    <color name="accent_glow">#2690CAF9</color>
+    <color name="accent">#64B5F6</color>
+    <color name="accent_glow">#2664B5F6</color>
     <color name="text_primary">#E3EFFB</color>
     <color name="text_secondary">#9AA0A6</color>
     <color name="bar_fill">#8C2B2F3A</color>
-    <color name="bar_border">#4D90CAF9</color>
+    <color name="bar_border">#4D64B5F6</color>
     <color name="panel_body">#F2151C26</color>
-    <color name="panel_border">#2690CAF9</color>
+    <color name="panel_border">#2664B5F6</color>
     <color name="legend_fill">#CC151C26</color>
 
     <!-- Launcher icon background -->

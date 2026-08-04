@@ -53,10 +53,10 @@ class SettingsActivity : AppCompatActivity() {
     private fun buildDivider(): View {
         val v = View(this)
         v.layoutParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(2)
+            ViewGroup.LayoutParams.MATCH_PARENT, 1
         )
         v.setBackgroundColor(
-            androidx.core.content.ContextCompat.getColor(this, R.color.accent_glow)
+            androidx.core.content.ContextCompat.getColor(this, R.color.outline_variant)
         )
         return v
     }
@@ -74,7 +74,4 @@ class SettingsActivity : AppCompatActivity() {
         detailBtn.setOnClickListener { ModelDetailActivity.start(this, info) }
         return card
     }
-
-    private fun dp(v: Int): Int =
-        (v * resources.displayMetrics.density).toInt()
 }
