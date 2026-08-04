@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark palette: near-black + bright indigo accent -->
-    <color name="primary">#9FA8DA</color>
-    <color name="on_primary">#1A237E</color>
-    <color name="primary_container">#283593</color>
-    <color name="on_primary_container">#C5CAE9</color>
+    <!-- Dark palette: near-black + bright sky-blue accent -->
+    <color name="primary">#90CAF9</color>
+    <color name="on_primary">#0D47A1</color>
+    <color name="primary_container">#1565C0</color>
+    <color name="on_primary_container">#BBDEFB</color>
     <color name="secondary">#9AA0A6</color>
-    <color name="on_secondary">#1A237E</color>
+    <color name="on_secondary">#0D47A1</color>
     <color name="secondary_container">#1C2333</color>
-    <color name="on_secondary_container">#C5CAE9</color>
+    <color name="on_secondary_container">#BBDEFB</color>
 
-    <color name="surface">#0A0F0C</color>
-    <color name="on_surface">#E8EAF6</color>
-    <color name="surface_container_high">#161B22</color>
-    <color name="surface_variant">#1F262E</color>
+    <color name="surface">#0A0F14</color>
+    <color name="on_surface">#E3EFFB</color>
+    <color name="surface_container_high">#151C26</color>
+    <color name="surface_variant">#1E2836</color>
     <color name="on_surface_variant">#9AA0A6</color>
-    <color name="outline">#3A4149</color>
-    <color name="outline_variant">#222A33</color>
+    <color name="outline">#39424E</color>
+    <color name="outline_variant">#212B38</color>
 
-    <color name="background">#0A0F0C</color>
-    <color name="on_background">#E8EAF6</color>
+    <color name="background">#0A0F14</color>
+    <color name="on_background">#E3EFFB</color>
 
     <!-- App-wide tokens (dark) -->
-    <color name="bg_top">#0A0F0C</color>
-    <color name="bg_bottom">#12161B</color>
-    <color name="accent">#9FA8DA</color>
-    <color name="accent_glow">#269FA8DA</color>
-    <color name="text_primary">#E8EAF6</color>
+    <color name="bg_top">#0A0F14</color>
+    <color name="bg_bottom">#11161F</color>
+    <color name="accent">#90CAF9</color>
+    <color name="accent_glow">#2690CAF9</color>
+    <color name="text_primary">#E3EFFB</color>
     <color name="text_secondary">#9AA0A6</color>
-    <color name="bar_fill">#B32B2B3B</color>
-    <color name="bar_gloss">#4DFFFFFF</color>
-    <color name="bar_border">#4D9FA8DA</color>
-    <color name="panel_body">#F2141A21</color>
-    <color name="panel_border">#269FA8DA</color>
-    <color name="legend_fill">#CC161B22</color>
+    <color name="bar_fill">#D92B2F3A</color>
+    <color name="bar_border">#4D90CAF9</color>
+    <color name="panel_body">#F2151C26</color>
+    <color name="panel_border">#2690CAF9</color>
+    <color name="legend_fill">#CC151C26</color>
 
     <!-- Launcher icon background -->
-    <color name="ic_launcher_background">#9FA8DA</color>
+    <color name="ic_launcher_background">#90CAF9</color>
 </resources>

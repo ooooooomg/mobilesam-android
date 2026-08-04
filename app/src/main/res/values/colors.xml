@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light palette: pure white + indigo accent -->
-    <color name="primary">#3F51B5</color>
+    <!-- Light palette: white + sky-blue accent -->
+    <color name="primary">#1E88E5</color>
     <color name="on_primary">#FFFFFF</color>
-    <color name="primary_container">#E8EAF6</color>
-    <color name="on_primary_container">#1A237E</color>
+    <color name="primary_container">#D6E9FB</color>
+    <color name="on_primary_container">#0D47A1</color>
     <color name="secondary">#5F6368</color>
     <color name="on_secondary">#FFFFFF</color>
     <color name="secondary_container">#F1F3F4</color>
@@ -13,10 +13,10 @@
     <color name="surface">#F6F8FC</color>
     <color name="on_surface">#202124</color>
     <color name="surface_container_high">#EDF1F7</color>
-    <color name="surface_variant">#EDF1F7</color>
+    <color name="surface_variant">#E7EEF6</color>
     <color name="on_surface_variant">#5F6368</color>
-    <color name="outline">#D5DCE8</color>
-    <color name="outline_variant">#E6EBF3</color>
+    <color name="outline">#CFD9E6</color>
+    <color name="outline_variant">#E3EAF2</color>
 
     <color name="background">#F6F8FC</color>
     <color name="on_background">#202124</color>
@@ -24,17 +24,16 @@
     <!-- App-wide tokens (light) -->
     <color name="bg_top">#F6F8FC</color>
     <color name="bg_bottom">#EDF1F7</color>
-    <color name="accent">#3F51B5</color>
-    <color name="accent_glow">#1F3F51B5</color>
+    <color name="accent">#1E88E5</color>
+    <color name="accent_glow">#1F1E88E5</color>
     <color name="text_primary">#202124</color>
     <color name="text_secondary">#5F6368</color>
-    <color name="bar_fill">#CCE8EAF6</color>
-    <color name="bar_gloss">#8CFFFFFF</color>
-    <color name="bar_border">#4D3F51B5</color>
+    <color name="bar_fill">#E6E8F2FC</color>
+    <color name="bar_border">#4D1E88E5</color>
     <color name="panel_body">#F2EDF1F7</color>
-    <color name="panel_border">#1A3F51B5</color>
-    <color name="legend_fill">#CCE8EAF6</color>
+    <color name="panel_border">#1A1E88E5</color>
+    <color name="legend_fill">#D9E8F2FC</color>
 
     <!-- Launcher icon background -->
-    <color name="ic_launcher_background">#3F51B5</color>
+    <color name="ic_launcher_background">#1E88E5</color>
 </resources>
