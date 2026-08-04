@@ -2,7 +2,7 @@
 
 本项目的所有显著变更按时间倒序记录。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [1.0.6] - 2026-08-04
+## [1.0.7] - 2026-08-04
 
 ### 变更
 
@@ -11,7 +11,9 @@
 
 ### 备注
 
-- 尝试引入 BlurView 实现真毛玻璃，但构建环境无法访问 Maven Central 拉取该依赖（网络受限），已回退保持半透明方案
+- 尝试引入 BlurView 实现真毛玻璃：构建环境代理无法访问 JitPack/Maven 上的 `com.eightbitlab:blurview` 坐标（均 404），已回退保持半透明方案。真毛玻璃可后续在可联网环境下用 BlurView 或系统 RenderEffect（API 31+）接入
+
+## [1.0.6] - 2026-08-04
 
 ## [1.0.5] - 2026-08-04
 
