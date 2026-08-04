@@ -19,6 +19,7 @@
 
 | 名称 | 副标 | 类型 | 精度 | 速度 | 说明 |
 |---|---|---|---|---|---|
+| 轻量检测 | PicoDet-S / 320 | 纯检测 | FP32 | 最省电 | PP-PicoDet-S，非 YOLO，最轻量 |
 | 智能检测 | YOLO11n / 384 | 纯检测 | FP32 | 轻量/快速 | 仅方框，无蒙版，最快 |
 | 快速分割 | YOLO11n / 384 | 端到端 | FP32 | 轻量/快速 | 单模型一步分割，均衡 |
 | 快速分割/节能 | YOLO11n / 384 / INT8 | 端到端 | INT8 | 最省电 | INT8 量化，更省电 |
@@ -47,6 +48,7 @@
 | `mobile_sam_encoder.onnx` | 27MB | MobileSAM TinyViT 图像编码器 |
 | `mobile_sam_decoder.onnx` | 16MB | MobileSAM mask decoder |
 | `yolov8n.onnx` | 13MB | YOLOv8n 检测器（两段式 prompt 用） |
+| `picodet_s_320_coco.onnx` | 4MB | PP-PicoDet-S 轻量检测器（非 YOLO） |
 | `yolo11n-384.onnx` | 11MB | YOLO11n 纯检测（384） |
 | `yolo11n-seg-384.onnx` | 12MB | YOLO11n-seg 分割（384） |
 | `yolo11n-seg-384-int8.onnx` | 3.4MB | YOLO11n-seg 分割（384，INT8 量化） |

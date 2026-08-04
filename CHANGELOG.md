@@ -2,6 +2,20 @@
 
 本项目的所有显著变更按时间倒序记录。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [1.2.0] - 2026-08-04
+
+### 新增
+
+- **PP-PicoDet-S 轻量检测模型**（非 YOLO 生态）：百度 PaddleDetection 官方，Apache-2.0，≈1.2M 参数，COCO 80 类
+  - 受限网络环境下通过清华镜像 + Gitee 完成 PaddleDetection 环境搭建并导出 ONNX（4MB）
+  - 新增 `PicoDetSegmenter`：DFL softmax 解码 + 锚点偏移 + NMS
+  - 模型名「轻量检测」，最省电，作为独立纯检测模型可选
+  - ONNX Runtime 实测：真实 COCO 图检测正确
+
+### 说明
+
+- NanoDet-Plus 因源码/权重在当前网络环境无法获取（GitHub 超时），未接入；PicoDet-S 已覆盖"非 YOLO 轻量检测"的核心价值
+
 ## [1.1.1] - 2026-08-04
 
 ### 变更
