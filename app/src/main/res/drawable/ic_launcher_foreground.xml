@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Camera lens ring (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,40a14,14 0 1,0 0.1,0z" />
+    <!-- Lens inner (indigo) -->
+    <path
+        android:fillColor="#3F51B5"
+        android:pathData="M54,44a10,10 0 1,0 0.1,0z" />
+    <!-- Lens inner gradient ring (light indigo) -->
+    <path
+        android:fillColor="#C5CAE9"
+        android:pathData="M54,47a7,7 0 1,0 0.1,0z" />
+    <!-- Colored segmentation mask blobs (detected objects) -->
+    <path
+        android:fillColor="#00C853"
+        android:pathData="M66,54a9,9 0 1,0 0.1,0z" />
+    <path
+        android:fillColor="#FF6A00"
+        android:pathData="M38,50a7,7 0 1,0 0.1,0z" />
+    <path
+        android:fillColor="#E040FB"
+        android:pathData="M42,64a5.5,5.5 0 1,0 0.1,0z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M64,66a4.5,4.5 0 1,0 0.1,0z" />
+    <!-- Small outline dots hinting at the mask grid -->
+    <path
+        android:fillColor="#1F3F51B5"
+        android:pathData="M50,60a2,2 0 1,0 0.1,0z M58,58a2,2 0 1,0 0.1,0z M62,60a2,2 0 1,0 0.1,0z" />
+</vector>

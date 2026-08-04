@@ -1,4 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MobileSAM</string>
+    <string name="app_name">实时分割</string>
+
+    <!-- 相机页 -->
+    <string name="loading_models">加载模型…</string>
+    <string name="initializing">初始化中…</string>
+    <string name="need_camera_permission">需要相机权限</string>
+    <string name="camera_start_failed">相机启动失败</string>
+    <string name="processing_failed">处理失败</string>
+    <string name="album_label">相册</string>
+    <string name="detect_none">—</string>
+    <string name="model_picker_default">选择模型</string>
+    <string name="model_picker_title">选择分割模型</string>
+    <string name="model_loading">加载 %1$s…</string>
+    <string name="tab_seg">分割</string>
+    <string name="tab_album">相册</string>
+    <string name="tab_settings">设置</string>
+    <string name="flip_camera">切换摄像头</string>
+    <string name="settings_title">设置 · 关于</string>
+    <string name="settings_loading">加载中…</string>
+    <string name="section_current_model">当前模型</string>
+    <string name="section_all_models">全部模型</string>
+    <string name="section_about">关于与开源</string>
+    <string name="current_runtime_format">输入 %1$d × %2$d    线程 %3$d / %4$d    内核 %5$d</string>
+    <string name="model_detail_title">模型详情</string>
+    <string name="detail_section_overview">架构与指标</string>
+    <string name="detail_section_scenarios">适用场景</string>
+    <string name="detail_section_refs">参考资料</string>
+    <string name="detail_open_paper">查看论文</string>
+    <string name="detail_open_github">查看源码</string>
+    <string name="save_no_frame">暂无分割画面</string>
+    <string name="save_ok">已保存到相册</string>
+    <string name="save_failed">保存失败</string>
+    <string name="about_text">MobileSAM-Android\n实时物体分割\n\n引擎:ONNX Runtime(CPU)\n检测:YOLOv8n / YOLO11n-seg\n分割:MobileSAM / YOLO-seg\n\n开源:Apache-2.0 · AGPL-3.0</string>
+    <string name="model_load_failed">模型加载失败</string>
+
+    <!-- 相册页 -->
+    <string name="album_title">相册分割</string>
+    <string name="back_to_camera">返回相机</string>
+    <string name="pick_image">选择图片</string>
+    <string name="models_ready">模型就绪，选择图片开始</string>
+    <string name="processing">处理中…</string>
+    <string name="load_failed">加载失败</string>
+    <string name="need_image_permission">需要图片读取权限</string>
+    <string name="memory_insufficient">内存不足，图片过大</string>
+    <string name="segmented_format">分割 %1$d 个物体，耗时 %2$dms</string>
+    <string name="image_desc">分割结果</string>
 </resources>

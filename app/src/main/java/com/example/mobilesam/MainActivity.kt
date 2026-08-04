@@ -1,18 +1,20 @@
 package com.example.mobilesam
 
-import ai.onnxruntime.OrtEnvironment
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,13 +24,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var imageView: ImageView
     private lateinit var statusText: TextView
+    private lateinit var progressBar: CircularProgressIndicator
     private var pipeline: InferencePipeline? = null
     private val scope = CoroutineScope(Dispatchers.Default)
-
-    // 模型资源（放 assets/ 下）
-    private val ENCODER_ASSET = "mobile_sam_encoder.onnx"
-    private val DECODER_ASSET = "mobile_sam_decoder.onnx"
-    private val YOLO_ASSET = "yolov8n.onnx"
 
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -39,10 +37,27 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val root = findViewById<android.widget.LinearLayout>(R.id.mainRoot)
+        val basePad = resources.getDimensionPixelSize(R.dimen.spacing_l)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(
+                basePad + bars.left,
+                basePad + bars.top,
+                basePad + bars.right,
+                basePad + bars.bottom,
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
         imageView = findViewById(R.id.imageView)
         statusText = findViewById(R.id.statusText)
-        val pickBtn = findViewById<Button>(R.id.pickButton)
-        val demoBtn = findViewById<Button>(R.id.demoButton)
+        progressBar = findViewById(R.id.progressBar)
+        val pickBtn = findViewById<View>(R.id.pickButton)
+        val backToCameraBtn = findViewById<View>(R.id.backToCameraButton)
+
+        findViewById<View>(R.id.backButton).setOnClickListener { finish() }
+        backToCameraBtn.setOnClickListener { finish() }
 
         pickBtn.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
@@ -53,7 +68,6 @@ class MainActivity : AppCompatActivity() {
                 pickImage.launch("image/*")
             }
         }
-        demoBtn.setOnClickListener { runDemoImage() }
 
         loadModels()
     }
@@ -61,28 +75,33 @@ class MainActivity : AppCompatActivity() {
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) pickImage.launch("image/*")
-            else statusText.text = "需要图片读取权限"
+            else statusText.text = getString(R.string.need_image_permission)
         }
 
     private fun loadModels() {
-        statusText.text = "加载模型..."
+        statusText.text = getString(R.string.loading_models)
         scope.launch {
-            val env = OrtEnvironment.getEnvironment()
-            val encoderBytes = assets.open(ENCODER_ASSET).use { it.readBytes() }
-            val decoderBytes = assets.open(DECODER_ASSET).use { it.readBytes() }
-            val yoloBytes = assets.open(YOLO_ASSET).use { it.readBytes() }
-            val pipe = InferencePipeline(
-                SamImageEncoder(env, encoderBytes),
-                SamMaskDecoder(env, decoderBytes),
-                YoloDetector(env, yoloBytes),
-            )
-            pipeline = pipe
-            withContext(Dispatchers.Main) { statusText.text = "模型就绪，选择图片开始" }
+            try {
+                // Same model the camera page last selected.
+                val prefs = getSharedPreferences("mobilesam_prefs", MODE_PRIVATE)
+                val info = ModelRegistry.byId(prefs.getString("model_id", null) ?: "")
+                    ?: ModelRegistry.default()
+                pipeline = InferencePipeline(SegmenterFactory.create(this@MainActivity, info))
+                withContext(Dispatchers.Main) {
+                    statusText.text = getString(R.string.models_ready)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MobileSAM", "model load failed", e)
+                withContext(Dispatchers.Main) {
+                    statusText.text = getString(R.string.model_load_failed) + ": ${e.message?.take(60)}"
+                }
+            }
         }
     }
 
     private fun loadAndSegment(uri: Uri) {
-        statusText.text = "处理中..."
+        statusText.text = getString(R.string.processing)
+        progressBar.visibility = View.VISIBLE
         scope.launch {
             try {
                 val bmp = withContext(Dispatchers.IO) {
@@ -90,17 +109,26 @@ class MainActivity : AppCompatActivity() {
                 }
                 val pipe = pipeline
                 if (bmp == null || pipe == null) {
-                    withContext(Dispatchers.Main) { statusText.text = "加载失败" }
+                    withContext(Dispatchers.Main) {
+                        statusText.text = getString(R.string.load_failed)
+                        progressBar.visibility = View.GONE
+                    }
                     return@launch
                 }
-                val result = pipe.run(bmp)
+                val result = pipe.runSingle(bmp)
                 bmp.recycle()
                 withContext(Dispatchers.Main) {
                     imageView.setImageBitmap(result.overlay)
-                    statusText.text = "分割 ${result.objectCount} 个物体，耗时 ${result.inferenceMs}ms"
+                    statusText.text = getString(
+                        R.string.segmented_format, result.objectCount, result.totalMs
+                    )
+                    progressBar.visibility = View.GONE
                 }
             } catch (e: OutOfMemoryError) {
-                withContext(Dispatchers.Main) { statusText.text = "内存不足，图片过大" }
+                withContext(Dispatchers.Main) {
+                    statusText.text = getString(R.string.memory_insufficient)
+                    progressBar.visibility = View.GONE
+                }
                 System.gc()
             } catch (e: Exception) {
                 val detail = buildString {
@@ -121,7 +149,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    statusText.text = "处理失败: $detail"
+                    statusText.text = getString(R.string.processing_failed) + ": $detail"
+                    progressBar.visibility = View.GONE
                     android.util.Log.e("MobileSAM", "segment failed", e)
                 }
             }
@@ -183,25 +212,6 @@ class MainActivity : AppCompatActivity() {
             rotated
         } catch (e: Exception) {
             bitmap
-        }
-    }
-
-    /** 内置测试图（res/drawable/demo.png 若存在），无需选图即可验证。 */
-    private fun runDemoImage() {
-        val id = resources.getIdentifier("demo", "drawable", packageName)
-        if (id == 0) {
-            statusText.text = "无内置测试图，请点'选择图片'"
-            return
-        }
-        val bmp = BitmapFactory.decodeResource(resources, id)
-        statusText.text = "处理中..."
-        scope.launch {
-            val pipe = pipeline ?: return@launch
-            val result = pipe.run(bmp)
-            withContext(Dispatchers.Main) {
-                imageView.setImageBitmap(result.overlay)
-                statusText.text = "分割 ${result.objectCount} 个物体，耗时 ${result.inferenceMs}ms"
-            }
         }
     }
 

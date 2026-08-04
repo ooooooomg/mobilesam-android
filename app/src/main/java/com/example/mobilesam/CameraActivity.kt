@@ -1,16 +1,17 @@
 package com.example.mobilesam
 
-import ai.onnxruntime.OrtEnvironment
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -19,35 +20,40 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Real-time camera segmentation: CameraX -> YOLO detect -> MobileSAM 512
- * encoder -> decoder masks -> overlay on PreviewView.
+ * Real-time camera segmentation: CameraX -> YOLO detect -> MobileSAM encoder
+ * (async) -> decoder masks -> transparent overlay on PreviewView.
  */
 class CameraActivity : AppCompatActivity() {
 
     private lateinit var previewView: PreviewView
     private lateinit var overlayView: OverlayView
-    private lateinit var statusText: TextView
+    private lateinit var topBar: View
+    private lateinit var modelPickerButton: View
+    private lateinit var modelTitleText: TextView
+    private lateinit var modelSubText: TextView
+    private lateinit var hudFps: TextView
+    private lateinit var legendText: TextView
+    private lateinit var legendPanel: View
+    private lateinit var loadingChip: View
 
     private var pipeline: InferencePipeline? = null
     private val busy = AtomicBoolean(false)
     private val inferenceJob = Job()
     private val scope = CoroutineScope(Dispatchers.Default + inferenceJob)
-    private val inferenceMutex = Mutex()
     private var cameraExecutor = Executors.newSingleThreadExecutor()
-
-    private val ENCODER_ASSET = "mobile_sam_encoder.onnx"
-    private val DECODER_ASSET = "mobile_sam_decoder.onnx"
-    private val YOLO_ASSET = "yolov8n.onnx"
+    private var useFrontCamera = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +61,54 @@ class CameraActivity : AppCompatActivity() {
 
         previewView = findViewById(R.id.previewView)
         overlayView = findViewById(R.id.overlayView)
-        statusText = findViewById(R.id.statusText)
+        topBar = findViewById(R.id.topBar)
+        modelPickerButton = findViewById(R.id.modelPickerButton)
+        modelTitleText = findViewById(R.id.modelTitleText)
+        modelSubText = findViewById(R.id.modelSubText)
+        hudFps = findViewById(R.id.hudFps)
+        legendText = findViewById(R.id.legendText)
+        legendPanel = findViewById(R.id.legendPanel)
+        loadingChip = findViewById(R.id.loadingChip)
+
+        // TextureView renders into its own surface layer, so an ancestor's
+        // clipPath can't round its corners. Force a hardware layer so the
+        // content is composited into the view's own layer, which the rounded
+        // outline can then clip.
+        val cornerPx = resources.getDimension(R.dimen.app_corner)
+        val roundedOutline = object : android.view.ViewOutlineProvider() {
+            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, cornerPx)
+            }
+        }
+        previewView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        previewView.outlineProvider = roundedOutline
+        previewView.clipToOutline = true
+
+        overlayView.isClickable = false
+
+        setupModelPicker()
+        setupTabs()
+
+        findViewById<View>(R.id.flipButton).setOnClickListener {
+            useFrontCamera = !useFrontCamera
+            bindCamera()
+        }
+
+        // Apply system-bar insets so the top bar and tab bar don't sit under
+        // the status/navigation bars (Android 15 enforces edge-to-edge).
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.cameraRoot)) { _, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val topLp = topBar.layoutParams as ViewGroup.MarginLayoutParams
+            topLp.topMargin = bars.top + dp(12)
+            topBar.layoutParams = topLp
+            val tabParams = findViewById<View>(R.id.tabBar).layoutParams as ViewGroup.MarginLayoutParams
+            tabParams.bottomMargin = bars.bottom + dp(20)
+            findViewById<View>(R.id.tabBar).layoutParams = tabParams
+            val legendParams = legendPanel.layoutParams as ViewGroup.MarginLayoutParams
+            legendParams.bottomMargin = bars.bottom + resources.getDimensionPixelSize(R.dimen.legend_margin_bottom)
+            legendPanel.layoutParams = legendParams
+            WindowInsetsCompat.CONSUMED
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
@@ -66,25 +119,239 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    /** Bottom icons: album -> MainActivity; seg saves frame; settings page. */
+    private fun setupTabs() {
+        findViewById<View>(R.id.tabAlbum).setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        findViewById<View>(R.id.tabSeg).setOnClickListener {
+            saveCurrentFrame()
+        }
+        findViewById<View>(R.id.tabSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+    }
+
+    /** Save the current segmented overlay to the system gallery via MediaStore. */
+    private fun saveCurrentFrame() {
+        val bmp = overlayView.currentOverlay() ?: run {
+            android.widget.Toast.makeText(this, R.string.save_no_frame, android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        scope.launch {
+            try {
+                val saved = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    saveToGallery(bmp)
+                }
+                runOnUiThread {
+                    android.widget.Toast.makeText(
+                        this@CameraActivity,
+                        if (saved) R.string.save_ok else R.string.save_failed,
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MobileSAM", "save failed", e)
+                runOnUiThread {
+                    android.widget.Toast.makeText(
+                        this@CameraActivity, R.string.save_failed, android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun saveToGallery(bmp: android.graphics.Bitmap): Boolean {
+        val resolver = contentResolver
+        val name = "mobilesam_" + System.currentTimeMillis() + ".png"
+        val values = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/MobileSAM")
+        }
+        val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: return false
+        return try {
+            resolver.openOutputStream(uri)?.use { out ->
+                bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+            } != null
+        } catch (e: Exception) {
+            resolver.delete(uri, null, null)
+            false
+        }
+    }
+
     private val requestCameraPermission =
-        registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) startCamera()
-            else statusText.text = "需要相机权限"
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                startCamera()
+            } else {
+                loadingChip.visibility = View.GONE
+                cancelLegendHide()
+                legendText.text = getString(R.string.need_camera_permission)
+                legendPanel.visibility = View.VISIBLE
+            }
         }
 
     private fun startCamera() {
-        statusText.text = "加载模型..."
         scope.launch {
-            val env = OrtEnvironment.getEnvironment()
-            val encoderBytes = assets.open(ENCODER_ASSET).use { it.readBytes() }
-            val decoderBytes = assets.open(DECODER_ASSET).use { it.readBytes() }
-            val yoloBytes = assets.open(YOLO_ASSET).use { it.readBytes() }
-            pipeline = InferencePipeline(
-                SamImageEncoder(env, encoderBytes),
-                SamMaskDecoder(env, decoderBytes),
-                YoloDetector(env, yoloBytes),
-            )
+            try {
+                val info = selectedModel()
+                pipeline = InferencePipeline(SegmenterFactory.create(this@CameraActivity, info))
+                runOnUiThread {
+                    loadingChip.visibility = View.GONE
+                    modelTitleText.text = info.friendlyName
+                    modelSubText.text = info.subLabel
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MobileSAM", "model load failed", e)
+                runOnUiThread {
+                    loadingChip.visibility = View.GONE
+                    cancelLegendHide()
+                    legendText.text = getString(R.string.model_load_failed) + ": ${e.message?.take(60)}"
+                    legendPanel.visibility = View.VISIBLE
+                }
+            }
             bindCamera()
+        }
+    }
+
+    /** The model id persisted by the picker, or the registry default. */
+    private fun selectedModel(): ModelRegistry.ModelInfo {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val id = prefs.getString(KEY_MODEL_ID, null)
+        return ModelRegistry.byId(id ?: "") ?: ModelRegistry.default()
+    }
+
+    private fun setupModelPicker() {
+        val info = selectedModel()
+        modelTitleText.text = info.friendlyName
+        modelSubText.text = info.subLabel
+        modelPickerButton.setOnClickListener {
+            ModelPickerDialog(
+                this,
+                ModelRegistry.models,
+                selectedModel().id,
+                { info -> switchToModel(info) },
+            ).show()
+        }
+    }
+
+    private fun switchToModel(info: ModelRegistry.ModelInfo) {
+        if (info.id == selectedModel().id) return
+        // Persist selection immediately so a relaunch uses it.
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit().putString(KEY_MODEL_ID, info.id).apply()
+
+        loadingChip.visibility = View.VISIBLE
+        legendPanel.visibility = View.GONE
+        scope.launch {
+            try {
+                val newSegmenter = SegmenterFactory.create(this@CameraActivity, info)
+                val pipe = pipeline
+                if (pipe == null) {
+                    // Camera not started yet: just record the choice; startCamera
+                    // will read it.
+                    newSegmenter.close()
+                    return@launch
+                }
+                pipe.switchSegmenter(newSegmenter)
+                runOnUiThread {
+                    loadingChip.visibility = View.GONE
+                    modelTitleText.text = info.friendlyName
+                    modelSubText.text = info.subLabel
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MobileSAM", "model switch failed", e)
+                runOnUiThread {
+                    loadingChip.visibility = View.GONE
+                    cancelLegendHide()
+                    legendText.text = getString(R.string.model_load_failed) + ": ${e.message?.take(60)}"
+                    legendPanel.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    /** Rebuild the danmaku-style legend chips only when the class set changes. */
+    private var legendSignature: String? = null
+    private val legendHide = android.os.Handler(android.os.Looper.getMainLooper())
+    private var legendHidePending = false
+    private val legendHideRunnable = Runnable {
+        legendPanel.visibility = View.GONE
+        legendSignature = null
+        legendHidePending = false
+    }
+
+    /** Cancel any pending danmaku-hide so status/error text stays visible. */
+    private fun cancelLegendHide() {
+        legendHide.removeCallbacks(legendHideRunnable)
+        legendHidePending = false
+    }
+
+    private fun updateLegend(classes: List<Int>) {
+        val sig = classes.distinct().sorted().take(4).joinToString(",")
+        if (sig.isEmpty()) {
+            // Hold the chips for a moment after the object disappears so they
+            // stay readable; error/status messages bypass this delay.
+            if (!legendHidePending) {
+                legendHidePending = true
+                legendHide.postDelayed(legendHideRunnable, 3000)
+            }
+            return
+        }
+        legendHide.removeCallbacks(legendHideRunnable)
+        legendHidePending = false
+        if (sig == legendSignature) return
+        legendSignature = sig
+
+        // Keep the legendText (error-message) child; drop any rebuilt chips.
+        val panel = legendPanel as android.view.ViewGroup
+        panel.removeViews(1, (panel.childCount - 1).coerceAtLeast(0))
+        legendText.text = ""
+        val shown = classes.distinct().take(3)
+        shown.forEachIndexed { i, cls ->
+            val color = MaskComposer.colorForClass(cls)
+            val chip = android.widget.TextView(this).apply {
+                text = "● ${CocoLabels.chineseFor(cls)}"
+                textSize = 16f
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+                setTextColor(context.getColor(R.color.text_primary))
+                setBackgroundResource(R.drawable.bg_legend_item)
+                setPadding(dp(12), dp(8), dp(12), dp(8))
+            }
+            panel.addView(chip, android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            ))
+            if (i < shown.size - 1) {
+                val spacer = View(this)
+                spacer.layoutParams = android.view.ViewGroup.LayoutParams(dp(8), 1)
+                panel.addView(spacer)
+            }
+        }
+        if (classes.distinct().size > 3) {
+            val more = android.widget.TextView(this).apply {
+                text = "＋${classes.distinct().size - 3}"
+                textSize = 16f
+                setTextColor(context.getColor(R.color.text_secondary))
+                setBackgroundResource(R.drawable.bg_legend_item)
+                setPadding(dp(12), dp(8), dp(12), dp(8))
+            }
+            panel.addView(more)
+        }
+        legendPanel.visibility = View.VISIBLE
+        // Danmaku float-up: each chip rises from below with a staggered fade-in.
+        for (i in 0 until panel.childCount) {
+            val child = panel.getChildAt(i)
+            child.alpha = 0f
+            child.translationY = dp(18).toFloat()
+            child.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay((i * 60).toLong())
+                .setDuration(280)
+                .start()
         }
     }
 
@@ -93,24 +360,44 @@ class CameraActivity : AppCompatActivity() {
         providerFuture.addListener({
             try {
                 val provider = providerFuture.get()
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
-                // Low resolution for real-time 30fps (preview stays full-res).
+
+                // Use the transparent TextureView implementation so the
+                // OverlayView's backdrop gradient (and the letterbox band)
+                // shows through instead of the SurfaceView's opaque black.
+                previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                // Both preview and analysis stream at 4:3 so the overlay (an
+                // opaque copy of the 4:3 analysis frame) aligns with the preview.
+                // FIT_CENTER shows the whole 4:3 frame, centered, with the
+                // theme gradient visible above/below.
+                previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
+
+                val preview = Preview.Builder()
+                    .setTargetResolution(android.util.Size(480, 360))
+                    .build().also {
+                        it.setSurfaceProvider(previewView.surfaceProvider)
+                    }
                 val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setTargetResolution(android.util.Size(640, 480))
+                    .setTargetResolution(android.util.Size(480, 360))
                     .build()
                 analysis.setAnalyzer(cameraExecutor) { image ->
                     analyzeFrame(image)
                 }
                 provider.unbindAll()
-                provider.bindToLifecycle(
-                    this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis
-                )
-                runOnUiThread { statusText.text = "实时分割中" }
+                val cameraSelector = if (useFrontCamera) {
+                    CameraSelector.DEFAULT_FRONT_CAMERA
+                } else {
+                    CameraSelector.DEFAULT_BACK_CAMERA
+                }
+                provider.bindToLifecycle(this, cameraSelector, preview, analysis)
+                runOnUiThread { hudFps.text = getString(R.string.initializing) }
             } catch (e: Exception) {
-                runOnUiThread { statusText.text = "相机启动失败: ${e.message}" }
+                android.util.Log.e("MobileSAM", "camera bind failed", e)
+                runOnUiThread {
+                    cancelLegendHide()
+                    legendText.text = getString(R.string.camera_start_failed) + ": ${e.message ?: e.javaClass.simpleName}"
+                    legendPanel.visibility = View.VISIBLE
+                }
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -121,43 +408,39 @@ class CameraActivity : AppCompatActivity() {
             return
         }
         busy.set(true)
+        var bitmap: Bitmap? = null
         try {
-            var t0 = System.currentTimeMillis()
             val raw = ImageUtils.imageProxyToBitmap(image)
             if (raw == null) return
-            val tConvert = System.currentTimeMillis() - t0
 
             // Rotate according to the frame's actual rotation metadata.
             val rotation = image.imageInfo.rotationDegrees
-            t0 = System.currentTimeMillis()
-            val bitmap = if (rotation != 0) {
+            bitmap = if (rotation != 0) {
                 ImageUtils.rotateBitmap(raw, rotation.toFloat())
             } else {
                 raw
             }
             if (bitmap !== raw) raw.recycle()
-            val tRotate = System.currentTimeMillis() - t0
 
             val pipe = pipeline
             if (pipe != null) {
-                val tInfer0 = System.currentTimeMillis()
-                val result = pipe.run(bitmap)
-                val tInfer = System.currentTimeMillis() - tInfer0
-                val total = tConvert + tRotate + tInfer
-                val fps = 1000.0 / total.coerceAtLeast(1)
-                val encMark = if (result.encodedThisFrame) "ENC" else "trk"
+                val result = pipe.onFrame(bitmap)
+                val fps = 1000.0 / result.totalMs.coerceAtLeast(1)
                 runOnUiThread {
                     overlayView.setResult(result.overlay)
-                    statusText.text = "${result.objectCount}物体 · ${fps.toInt()}fps · $encMark · " +
-                        "conv${tConvert}ms rot${tRotate}ms inf${tInfer}ms"
+                    hudFps.text = fps.toInt().toString() + " fps"
+                    updateLegend(result.detectedClasses)
                 }
-                bitmap.recycle()
-            } else {
-                bitmap.recycle()
             }
         } catch (e: Exception) {
-            runOnUiThread { statusText.text = "处理失败: ${e.message?.take(40)}" }
+            android.util.Log.e("MobileSAM", "analyzeFrame failed", e)
+            runOnUiThread {
+                cancelLegendHide()
+                legendText.text = getString(R.string.processing_failed) + ": ${e.message ?: e.javaClass.simpleName}"
+                legendPanel.visibility = View.VISIBLE
+            }
         } finally {
+            bitmap?.recycle()
             image.close()
             busy.set(false)
         }
@@ -165,8 +448,18 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        legendHide.removeCallbacks(legendHideRunnable)
         inferenceJob.cancel()
         cameraExecutor.shutdown()
+        pipeline?.close()
+    }
+
+    companion object {
+        private const val PREFS_NAME = "mobilesam_prefs"
+        private const val KEY_MODEL_ID = "model_id"
+
+        private fun dp(v: Int): Int =
+            (v * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
     }
 }
 
@@ -178,7 +471,10 @@ class OverlayView @JvmOverloads constructor(
 
     private var overlay: Bitmap? = null
     private val paint = Paint().apply { isFilterBitmap = true }
+    private val bgPaint = Paint()
+    private var bgShader: android.graphics.Shader? = null
 
+    /** The previous overlay bitmap is recycled; the caller creates fresh ones. */
     fun setResult(bmp: Bitmap) {
         val old = overlay
         overlay = bmp
@@ -186,11 +482,33 @@ class OverlayView @JvmOverloads constructor(
         invalidate()
     }
 
+    /** Copy of the current segmented frame, or null if none yet. */
+    fun currentOverlay(): Bitmap? = overlay?.copy(Bitmap.Config.ARGB_8888, true)
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        // Dark gradient backdrop, so the letterbox band above/below the 4:3
+        // frame shows the theme gradient instead of the raw black surface.
+        if (bgShader == null || width != bgShaderWidth || height != bgShaderHeight) {
+            bgShader = android.graphics.LinearGradient(
+                0f, 0f, 0f, height.toFloat(),
+                intArrayOf(
+                    ContextCompat.getColor(context, R.color.bg_top),
+                    ContextCompat.getColor(context, R.color.bg_bottom),
+                ),
+                null,
+                android.graphics.Shader.TileMode.CLAMP,
+            )
+            bgShaderWidth = width
+            bgShaderHeight = height
+        }
+        bgPaint.shader = bgShader
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+
         overlay?.let { bmp ->
             // Fit-center: keep aspect ratio, center within the view.
-            // Mirrors PreviewView's default scale type so the overlay aligns.
+            // Mirrors PreviewView's scale so the overlay aligns with the feed.
             val vw = width.toFloat()
             val vh = height.toFloat()
             val bmpW = bmp.width.toFloat()
@@ -209,57 +527,7 @@ class OverlayView @JvmOverloads constructor(
             )
         }
     }
-}
 
-/** Converts a CameraX ImageProxy (YUV_420_888) to an RGB Bitmap. */
-object ImageUtils {
-    fun imageProxyToBitmap(image: ImageProxy): Bitmap? {
-        // Direct YUV_420_888 -> RGB, no JPEG round-trip (fast path for
-        // real-time). Handles rowStride/pixelStride per plane.
-        val yPlane = image.planes[0]
-        val uPlane = image.planes[1]
-        val vPlane = image.planes[2]
-        val width = image.width
-        val height = image.height
-
-        val yBuffer = yPlane.buffer
-        val uBuffer = uPlane.buffer
-        val vBuffer = vPlane.buffer
-        val yRowStride = yPlane.rowStride
-        val uRowStride = uPlane.rowStride
-        val vRowStride = vPlane.rowStride
-        val yPixelStride = yPlane.pixelStride
-        val uPixelStride = uPlane.pixelStride
-        val vPixelStride = vPlane.pixelStride
-
-        val pixels = IntArray(width * height)
-        var yRow = 0
-        for (yy in 0 until height) {
-            // Position each plane's buffer at this row's start.
-            yBuffer.position(yy * yRowStride)
-            uBuffer.position((yy / 2) * uRowStride)
-            vBuffer.position((yy / 2) * vRowStride)
-            for (xx in 0 until width) {
-                val y = (yBuffer.get(yy * yRowStride + xx * yPixelStride).toInt() and 0xFF)
-                val ux = xx / 2
-                val u = (uBuffer.get((yy / 2) * uRowStride + ux * uPixelStride).toInt() and 0xFF) - 128
-                val v = (vBuffer.get((yy / 2) * vRowStride + ux * vPixelStride).toInt() and 0xFF) - 128
-                val r = (y + 1.402f * v).toInt().coerceIn(0, 255)
-                val g = (y - 0.344136f * u - 0.714136f * v).toInt().coerceIn(0, 255)
-                val b = (y + 1.772f * u).toInt().coerceIn(0, 255)
-                pixels[yy * width + xx] = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
-            }
-        }
-        return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
-    }
-
-    /** Rotate a bitmap by the given degrees (portrait correction). */
-    fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
-        if (degrees == 0f) return bitmap
-        val matrix = android.graphics.Matrix().apply { postRotate(degrees) }
-        val rotated = Bitmap.createBitmap(
-            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
-        )
-        return rotated
-    }
+    private var bgShaderWidth = 0
+    private var bgShaderHeight = 0
 }

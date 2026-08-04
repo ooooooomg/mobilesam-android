@@ -10,9 +10,9 @@ import kotlin.math.roundToInt
 /**
  * MobileSAM mask decoder on ONNX Runtime.
  *
- * Takes the image embedding + per-object boxes (in 1024-padded
+ * Takes the image embedding + per-object boxes (in 384-padded
  * coordinates), runs the decoder, and produces a mask at the original
- * image resolution. Mirrors scripts/mobile_e2e.py.
+ * image resolution.
  */
 class SamMaskDecoder(
     private val environment: OrtEnvironment,
@@ -23,18 +23,25 @@ class SamMaskDecoder(
     init {
         // CPU 多线程（NNAPI 初始化慢且混合执行，弃用）
         val opts = OrtSession.SessionOptions()
-        val cores = Runtime.getRuntime().availableProcessors()
-        opts.setIntraOpNumThreads(cores)
+        opts.setIntraOpNumThreads(4)
+        opts.setInterOpNumThreads(1)
         opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
         session = environment.createSession(modelBytes, opts)
-        android.util.Log.d("MobileSAM", "decoder CPU threads=$cores")
+        android.util.Log.d("MobileSAM", "decoder CPU threads=4/1")
     }
 
+    /**
+     * A segmentation mask. By default [mask] is a full-image HxW logits array
+     * (positive => foreground). For box-local segmenters (e.g. YOLO-seg), set
+     * [boxRect] so the composer only stretches the mask within that region and
+     * leaves everything else transparent.
+     */
     data class SegmentedMask(
         val mask: FloatArray,     // HxW logits (positive => foreground)
         val width: Int,
         val height: Int,
         val score: Float,
+        val boxRect: android.graphics.RectF? = null,
     )
 
     companion object {
@@ -45,7 +52,7 @@ class SamMaskDecoder(
     }
 
     /**
-     * Transform a box from original-image coords to 512-padded coords.
+     * Transform a box from original-image coords to 384-padded coords.
      * Uses the same scale the encoder applied (ResizeLongestSide).
      */
     private fun to1024(box: YoloDetector.DetBox, scale: Float): FloatArray {
@@ -62,9 +69,9 @@ class SamMaskDecoder(
     /**
      * Decode one box into a mask.
      *
-     * @param embedding flat (1,256,64,64) from SamImageEncoder
+     * @param embedding flat (1,256,24,24) from SamImageEncoder
      * @param box box in original-image coordinates
-     * @param scale encoder scale (original -> 1024 padded)
+     * @param scale encoder scale (original -> 384 padded)
      * @param origW original image width
      * @param origH original image height
      */

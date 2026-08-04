@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="hud_padding_h">14dp</dimen>
+    <dimen name="hud_padding_v">8dp</dimen>
+    <dimen name="panel_corner">12dp</dimen>
+    <dimen name="hud_text">14sp</dimen>
+    <dimen name="hud_value">26sp</dimen>
+    <dimen name="title_text">18sp</dimen>
+    <dimen name="spacing_s">10dp</dimen>
+    <dimen name="spacing_m">16dp</dimen>
+    <dimen name="spacing_l">20dp</dimen>
+    <dimen name="spacing_xl">28dp</dimen>
+    <dimen name="progress_size">18dp</dimen>
+    <dimen name="card_corner">16dp</dimen>
+    <dimen name="app_corner">20dp</dimen>
+    <dimen name="bar_margin_h">12dp</dimen>
+    <dimen name="legend_margin_bottom">140dp</dimen>
+</resources>
