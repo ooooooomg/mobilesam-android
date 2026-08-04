@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Bundle
 import android.view.View
@@ -73,6 +74,11 @@ class CameraActivity : AppCompatActivity() {
         setupModelPicker()
         setupTabs()
 
+        // Frost the regions behind the top/bottom bars once laid out.
+        findViewById<View>(R.id.cameraRoot).post {
+            updateFrostRegions()
+        }
+
         findViewById<View>(R.id.flipButton).setOnClickListener {
             useFrontCamera = !useFrontCamera
             bindCamera()
@@ -101,6 +107,22 @@ class CameraActivity : AppCompatActivity() {
         } else {
             requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
+    }
+
+    /** Compute the on-screen rects of the top/bottom bars for frost blur. */
+    private fun updateFrostRegions() {
+        val regions = ArrayList<RectF>()
+        fun barRect(v: View): RectF? {
+            if (v.width <= 0 || v.height <= 0) return null
+            val loc = IntArray(2)
+            v.getLocationOnScreen(loc)
+            // Overlay is full-screen in the same window, so screen == local coords.
+            return RectF(loc[0].toFloat(), loc[1].toFloat(),
+                (loc[0] + v.width).toFloat(), (loc[1] + v.height).toFloat())
+        }
+        barRect(topBar)?.let { regions.add(it) }
+        barRect(findViewById<View>(R.id.tabBar))?.let { regions.add(it) }
+        overlayView.setFrostRegions(regions)
     }
 
     /** Bottom icons: album -> MainActivity; seg saves frame; settings page. */
@@ -452,6 +474,10 @@ class OverlayView @JvmOverloads constructor(
 
     private var overlay: Bitmap? = null
     private val paint = Paint().apply { isFilterBitmap = true }
+    private val frostPaint = Paint().apply { isFilterBitmap = true }
+
+    /** Screen-space regions (top bar / bottom bar) that get a frosted-glass blur. */
+    private var frostRegions: List<android.graphics.RectF> = emptyList()
 
     /** The previous overlay bitmap is recycled; the caller creates fresh ones. */
     fun setResult(bmp: Bitmap) {
@@ -464,13 +490,18 @@ class OverlayView @JvmOverloads constructor(
     /** Copy of the current segmented frame, or null if none yet. */
     fun currentOverlay(): Bitmap? = overlay?.copy(Bitmap.Config.ARGB_8888, true)
 
+    /** Regions (in this view's coords) where the camera feed is frosted. */
+    fun setFrostRegions(regions: List<android.graphics.RectF>) {
+        frostRegions = regions
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         overlay?.let { bmp ->
             // Center-crop: scale so the 4:3 analysis frame fills the screen,
-            // cropping the longer dimension. Mirrors PreviewView's FILL_CENTER
-            // so masks stay aligned with the feed.
+            // cropping the longer dimension. Mirrors PreviewView's FILL_CENTER.
             val vw = width.toFloat()
             val vh = height.toFloat()
             val bmpW = bmp.width.toFloat()
@@ -487,6 +518,42 @@ class OverlayView @JvmOverloads constructor(
                 RectF(left, top, left + dw, top + dh),
                 paint,
             )
+
+            // Frosted-glass: down-sample each bar region to a tiny size, then
+            // stretch back -> strong blur of the feed behind the bars.
+            if (frostRegions.isNotEmpty()) {
+                for (r in frostRegions) {
+                    // Intersect with the drawn image rect.
+                    val ir = RectF(left, top, left + dw, top + dh)
+                    if (!ir.intersect(r)) continue
+                    // Map screen region -> source (bitmap) coordinates.
+                    val sx = (ir.left - left) / scale
+                    val sy = (ir.top - top) / scale
+                    val sw = ir.width() / scale
+                    val sh = ir.height() / scale
+                    if (sw < 2f || sh < 2f) continue
+                    val si = android.graphics.Rect(
+                        sx.toInt(), sy.toInt(),
+                        (sx + sw).toInt().coerceAtMost(bmp.width),
+                        (sy + sh).toInt().coerceAtMost(bmp.height),
+                    )
+                    if (si.width() <= 0 || si.height() <= 0) continue
+                    // Tiny down-sampled version (about 1/24 of the region).
+                    val tw = (si.width() / 24).coerceAtLeast(1)
+                    val th = (si.height() / 24).coerceAtLeast(1)
+                    val small = Bitmap.createScaledBitmap(
+                        Bitmap.createBitmap(bmp, si.left, si.top, si.width(), si.height()),
+                        tw, th, true,
+                    )
+                    canvas.drawBitmap(
+                        small,
+                        Rect(0, 0, tw, th),
+                        RectF(ir.left, ir.top, ir.right, ir.bottom),
+                        frostPaint,
+                    )
+                    small.recycle()
+                }
+            }
         }
     }
 }
