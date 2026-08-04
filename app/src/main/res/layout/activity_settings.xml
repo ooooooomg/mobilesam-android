@@ -68,6 +68,22 @@
                 android:textSize="12sp"
                 android:lineSpacingExtra="4dp"
                 android:fontFamily="sans-serif" />
+
+            <TextView
+                android:id="@+id/privacyLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_l"
+                android:text="@string/privacy_policy"
+                android:textColor="@color/accent"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
     </ScrollView>
 

@@ -39,6 +39,21 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.settingsBack).setOnClickListener { finish() }
+
+        findViewById<View>(R.id.privacyLink).setOnClickListener {
+            try {
+                startActivity(
+                    android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse(
+                            "https://github.com/ooooooomg/mobilesam-android/blob/master/PRIVACY_POLICY.md"
+                        )
+                    )
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("MobileSAM", "open privacy failed", e)
+            }
+        }
     }
 
     private fun buildDivider(): View {

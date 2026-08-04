@@ -26,6 +26,7 @@
     <string name="save_failed">保存失败</string>
     <string name="about_text">实时分割\nAndroid 上的实时物体分割与检测应用\n\n引擎 · ONNX Runtime(CPU)\n检测 · PicoDet / YOLO11n\n分割 · YOLO-seg / MobileSAM\n\n模型来源 · Ultralytics / PaddleDetection / MobileSAM\n开源许可 · Apache-2.0 · AGPL-3.0</string>
     <string name="model_load_failed">模型加载失败</string>
+    <string name="privacy_policy">隐私政策</string>
 
     <!-- 相册页 -->
     <string name="album_title">相册分割</string>
