@@ -45,47 +45,37 @@
             android:orientation="vertical"
             android:paddingBottom="@dimen/spacing_l">
 
-            <TextView
-                style="@style/SectionHeader"
-                android:text="@string/section_current_model" />
-
+            <!-- Current model (one rounded card) -->
             <FrameLayout
                 android:id="@+id/currentModelCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card" />
 
-            <TextView
-                style="@style/SectionHeader"
-                android:text="@string/section_all_models" />
-
+            <!-- All models (one rounded group, hairline separators) -->
             <LinearLayout
                 android:id="@+id/modelsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_l"
                 android:orientation="vertical"
                 android:background="@drawable/bg_group_card" />
 
-            <TextView
-                style="@style/SectionHeader"
-                android:text="@string/section_about" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:background="@color/outline_variant" />
 
-            <FrameLayout
-                android:id="@+id/aboutCard"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card"
-                android:padding="@dimen/spacing_m">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/about_text"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:lineSpacingExtra="4dp"
-                    android:fontFamily="sans-serif" />
-            </FrameLayout>
+                android:layout_marginTop="@dimen/spacing_l"
+                android:text="@string/about_text"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:lineSpacingExtra="4dp"
+                android:fontFamily="sans-serif" />
         </LinearLayout>
     </ScrollView>
 

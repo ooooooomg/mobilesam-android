@@ -34,8 +34,7 @@ class ModelDetailActivity : AppCompatActivity() {
         ) ?: ModelRegistry.default()
 
         findViewById<TextView>(R.id.detailName).text = info.friendlyName
-        findViewById<TextView>(R.id.detailSub).text = info.subLabel
-        findViewById<TextView>(R.id.detailTypeTag).text = info.typeLabel
+        findViewById<TextView>(R.id.detailSub).text = "${info.typeLabel} / ${info.subLabel}"
         findViewById<TextView>(R.id.detailDesc).text = info.desc
         findViewById<TextView>(R.id.detailArch).text = "架构 / ${info.architecture}"
         findViewById<TextView>(R.id.detailParams).text = "参数量 / ${info.params}"

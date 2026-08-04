@@ -19,13 +19,6 @@
     <string name="flip_camera">切换摄像头</string>
     <string name="settings_title">设置 · 关于</string>
     <string name="settings_loading">加载中…</string>
-    <string name="section_current_model">当前模型</string>
-    <string name="section_all_models">全部模型</string>
-    <string name="section_about">关于与开源</string>
-    <string name="model_detail_title">模型详情</string>
-    <string name="detail_section_overview">架构与指标</string>
-    <string name="detail_section_scenarios">适用场景</string>
-    <string name="detail_section_refs">参考资料</string>
     <string name="detail_open_paper">查看论文</string>
     <string name="detail_open_github">查看源码</string>
     <string name="save_no_frame">暂无分割画面</string>

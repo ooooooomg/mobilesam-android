@@ -26,11 +26,11 @@
             android:contentDescription="@string/back_to_camera" />
 
         <TextView
+            android:id="@+id/detailName"
             style="@style/TopBarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_s"
-            android:text="@string/model_detail_title" />
+            android:layout_marginStart="@dimen/spacing_s" />
     </LinearLayout>
 
     <ScrollView
@@ -45,48 +45,13 @@
             android:orientation="vertical"
             android:paddingBottom="@dimen/spacing_l">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/detailSub"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_card"
-                android:padding="18dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/detailName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_primary"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif" />
-
-                    <TextView
-                        android:id="@+id/detailSub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/detailTypeTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/accent"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif" />
-            </LinearLayout>
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif" />
 
             <TextView
                 android:id="@+id/detailDesc"
@@ -98,136 +63,96 @@
                 android:lineSpacingExtra="4dp"
                 android:fontFamily="sans-serif" />
 
-            <TextView
-                style="@style/SectionHeader"
-                android:text="@string/detail_section_overview" />
-
-            <LinearLayout
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_group_card"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp">
-
-                <TextView
-                    android:id="@+id/detailArch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:background="@color/outline_variant" />
-
-                <TextView
-                    android:id="@+id/detailParams"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
-
-                <TextView
-                    android:id="@+id/detailMap"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
-
-                <TextView
-                    android:id="@+id/detailFlops"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
-            </LinearLayout>
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="14dp"
+                android:background="@color/outline_variant" />
 
             <TextView
-                style="@style/SectionHeader"
-                android:text="@string/detail_section_scenarios" />
-
-            <LinearLayout
+                android:id="@+id/detailArch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_card"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/detailScenarios"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
-            </LinearLayout>
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="sans-serif" />
 
             <TextView
-                style="@style/SectionHeader"
-                android:text="@string/detail_section_refs" />
-
-            <LinearLayout
+                android:id="@+id/detailParams"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_group_card"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp">
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="sans-serif" />
 
-                <TextView
-                    android:id="@+id/detailPaper"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/accent"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:clickable="true"
-                    android:focusable="true" />
+            <TextView
+                android:id="@+id/detailMap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="sans-serif" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="6dp"
-                    android:background="@color/outline_variant" />
+            <TextView
+                android:id="@+id/detailFlops"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="sans-serif" />
 
-                <TextView
-                    android:id="@+id/detailGithub"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/accent"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/detailScenarios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="sans-serif" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="14dp"
+                android:background="@color/outline_variant" />
+
+            <TextView
+                android:id="@+id/detailPaper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/accent"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/detailGithub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/accent"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
     </ScrollView>
 
