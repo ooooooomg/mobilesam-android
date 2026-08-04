@@ -37,6 +37,15 @@ object SegmenterFactory {
                     nmsThreshold = info.nms,
                 )
             }
+            ModelRegistry.Type.PICODET -> {
+                PicoDetSegmenter(
+                    env,
+                    readAsset(context, info.modelAssetPath!!),
+                    inputSize = info.inputSize,
+                    confThreshold = info.conf,
+                    nmsThreshold = info.nms,
+                )
+            }
         }
     }
 

@@ -6,7 +6,7 @@ package com.example.mobilesam
  */
 object ModelRegistry {
 
-    enum class Type { TWOSTAGE, ENDTOEND, DETECT_ONLY }
+    enum class Type { TWOSTAGE, ENDTOEND, DETECT_ONLY, PICODET }
 
     data class ModelInfo(
         val id: String,
@@ -34,7 +34,7 @@ object ModelRegistry {
     ) {
         /** One-line path summary used by the settings cards. */
         fun pathSummary(): String = when (type) {
-            Type.ENDTOEND, Type.DETECT_ONLY -> "模型 / ${modelAssetPath ?: "—"}"
+            Type.ENDTOEND, Type.DETECT_ONLY, Type.PICODET -> "模型 / ${modelAssetPath ?: "—"}"
             Type.TWOSTAGE -> listOfNotNull(
                 detectorAssetPath?.let { "检测 / $it" },
                 encoderAssetPath?.let { "编码 / $it" },
@@ -44,6 +44,27 @@ object ModelRegistry {
     }
 
     val models = listOf(
+        ModelInfo(
+            id = "picodet-s-320",
+            friendlyName = "轻量检测",
+            subLabel = "PicoDet-S / 320",
+            type = Type.PICODET,
+            typeLabel = "纯检测",
+            precision = "FP32",
+            speed = "最省电",
+            desc = "PP-PicoDet-S 锚点无关轻量检测器，比 YOLO 更轻。",
+            architecture = "PicoDet-S + ESNet 主干,anchor-free + DFL 回归,80 类。",
+            params = "≈1.2M 参数(近似)",
+            map = "COCO mAP50-95 ≈ 30%(近似)",
+            flops = "≈1.7G FLOPs @320(近似)",
+            scenarios = "极低功耗设备上的实时物体检测。",
+            paperUrl = "https://arxiv.org/abs/2111.00902",
+            githubUrl = "https://github.com/PaddlePaddle/PaddleDetection",
+            modelAssetPath = "picodet_s_320_coco.onnx",
+            inputSize = 320,
+            conf = 0.4f,
+            nms = 0.5f,
+        ),
         ModelInfo(
             id = "yolo11n-384",
             friendlyName = "智能检测",
