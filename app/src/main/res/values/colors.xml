@@ -10,30 +10,30 @@
     <color name="secondary_container">#F1F3F4</color>
     <color name="on_secondary_container">#3C4043</color>
 
-    <color name="surface">#FFFFFF</color>
+    <color name="surface">#F6F8FC</color>
     <color name="on_surface">#202124</color>
-    <color name="surface_container_high">#F7F7F7</color>
-    <color name="surface_variant">#F1F3F4</color>
+    <color name="surface_container_high">#EDF1F7</color>
+    <color name="surface_variant">#EDF1F7</color>
     <color name="on_surface_variant">#5F6368</color>
-    <color name="outline">#DADCE0</color>
-    <color name="outline_variant">#F1F3F4</color>
+    <color name="outline">#D5DCE8</color>
+    <color name="outline_variant">#E6EBF3</color>
 
-    <color name="background">#FFFFFF</color>
+    <color name="background">#F6F8FC</color>
     <color name="on_background">#202124</color>
 
     <!-- App-wide tokens (light) -->
-    <color name="bg_top">#FFFFFF</color>
-    <color name="bg_bottom">#F5F5F5</color>
+    <color name="bg_top">#F6F8FC</color>
+    <color name="bg_bottom">#EDF1F7</color>
     <color name="accent">#3F51B5</color>
     <color name="accent_glow">#1F3F51B5</color>
     <color name="text_primary">#202124</color>
     <color name="text_secondary">#5F6368</color>
-    <color name="bar_fill">#99E8EAF6</color>
-    <color name="bar_gloss">#B3FFFFFF</color>
+    <color name="bar_fill">#CCE8EAF6</color>
+    <color name="bar_gloss">#8CFFFFFF</color>
     <color name="bar_border">#4D3F51B5</color>
-    <color name="panel_body">#F5FFFFFF</color>
+    <color name="panel_body">#F2EDF1F7</color>
     <color name="panel_border">#1A3F51B5</color>
-    <color name="legend_fill">#CCF5F5F5</color>
+    <color name="legend_fill">#CCE8EAF6</color>
 
     <!-- Launcher icon background -->
     <color name="ic_launcher_background">#3F51B5</color>

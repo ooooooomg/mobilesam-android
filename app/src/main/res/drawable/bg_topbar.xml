@@ -10,16 +10,15 @@
             <corners android:radius="@dimen/app_corner" />
         </shape>
     </item>
-    <!-- Top glass highlight: thin bright line, the signature frosted-glass edge -->
+    <!-- Thin top highlight only (2dp), fully rounded so it never reads as a box -->
     <item
         android:top="1dp"
         android:left="1dp"
-        android:right="1dp">
+        android:right="1dp"
+        android:height="2dp">
         <shape android:shape="rectangle">
             <solid android:color="@color/bar_gloss" />
-            <corners
-                android:topLeftRadius="@dimen/app_corner"
-                android:topRightRadius="@dimen/app_corner" />
+            <corners android:radius="@dimen/app_corner" />
         </shape>
     </item>
 </layer-list>
