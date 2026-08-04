@@ -4,14 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 /**
- * Settings page: grouped cards — current model (with runtime params), all
- * models, and open-source notes. Consistent serif typography throughout.
+ * Settings page: all models as one rounded group, and open-source notes.
  */
 class SettingsActivity : AppCompatActivity() {
 
@@ -31,13 +29,6 @@ class SettingsActivity : AppCompatActivity() {
             )
             androidx.core.view.WindowInsetsCompat.CONSUMED
         }
-
-        val prefs = getSharedPreferences("mobilesam_prefs", MODE_PRIVATE)
-        val current = ModelRegistry.byId(prefs.getString("model_id", null) ?: "")
-            ?: ModelRegistry.default()
-
-        val currentCard = findViewById<FrameLayout>(R.id.currentModelCard)
-        currentCard.addView(buildModelCard(current))
 
         val container = findViewById<LinearLayout>(R.id.modelsContainer)
         ModelRegistry.models.forEachIndexed { index, info ->

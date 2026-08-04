@@ -34,18 +34,27 @@ class ModelDetailActivity : AppCompatActivity() {
         ) ?: ModelRegistry.default()
 
         findViewById<TextView>(R.id.detailName).text = info.friendlyName
-        findViewById<TextView>(R.id.detailSub).text = "${info.typeLabel} / ${info.subLabel}"
+        findViewById<TextView>(R.id.detailSub).text = "${info.typeLabel} · ${info.subLabel}"
         findViewById<TextView>(R.id.detailDesc).text = info.desc
-        findViewById<TextView>(R.id.detailArch).text = "架构 / ${info.architecture}"
-        findViewById<TextView>(R.id.detailParams).text = "参数量 / ${info.params}"
-        findViewById<TextView>(R.id.detailMap).text = "精度 / ${info.map}"
-        findViewById<TextView>(R.id.detailFlops).text = "计算量 / ${info.flops}"
+        findViewById<TextView>(R.id.detailMeta).text = buildString {
+            append("作者 · ${info.authors}\n")
+            append("提出 · ${info.year} · ${info.org}\n")
+            append("参数量 · ${info.params}\n")
+            append("精度 · ${info.map}\n")
+            append("计算量 · ${info.flops}")
+        }
+        findViewById<TextView>(R.id.detailStructure).text = "结构 · ${info.structure}"
+        findViewById<TextView>(R.id.detailFeatures).text = "特点 · ${info.features}"
+        findViewById<TextView>(R.id.detailArch).text = "架构 · ${info.architecture}"
+        findViewById<TextView>(R.id.detailParams).text = "参数量 · ${info.params}"
+        findViewById<TextView>(R.id.detailMap).text = "精度 · ${info.map}"
+        findViewById<TextView>(R.id.detailFlops).text = "计算量 · ${info.flops}"
         findViewById<TextView>(R.id.detailScenarios).text = info.scenarios
 
         val paper = findViewById<TextView>(R.id.detailPaper)
         val github = findViewById<TextView>(R.id.detailGithub)
-        paper.text = "论文 / ${info.paperUrl}"
-        github.text = "源码 / ${info.githubUrl}"
+        paper.text = "论文 · ${info.paperUrl}"
+        github.text = "源码 · ${info.githubUrl}"
         paper.setOnClickListener { openUrl(info.paperUrl) }
         github.setOnClickListener { openUrl(info.githubUrl) }
 

@@ -17,14 +17,14 @@
     <string name="tab_album">相册</string>
     <string name="tab_settings">设置</string>
     <string name="flip_camera">切换摄像头</string>
-    <string name="settings_title">设置 · 关于</string>
+    <string name="settings_title">更多</string>
     <string name="settings_loading">加载中…</string>
     <string name="detail_open_paper">查看论文</string>
     <string name="detail_open_github">查看源码</string>
     <string name="save_no_frame">暂无分割画面</string>
     <string name="save_ok">已保存到相册</string>
     <string name="save_failed">保存失败</string>
-    <string name="about_text">MobileSAM-Android\n实时物体分割\n\n引擎:ONNX Runtime(CPU)\n检测:YOLOv8n / YOLO11n-seg\n分割:MobileSAM / YOLO-seg\n\n开源:Apache-2.0 · AGPL-3.0</string>
+    <string name="about_text">实时分割\nAndroid 上的实时物体分割与检测应用\n\n引擎 · ONNX Runtime(CPU)\n检测 · PicoDet / YOLO11n\n分割 · YOLO-seg / MobileSAM\n\n模型来源 · Ultralytics / PaddleDetection / MobileSAM\n开源许可 · Apache-2.0 · AGPL-3.0</string>
     <string name="model_load_failed">模型加载失败</string>
 
     <!-- 相册页 -->

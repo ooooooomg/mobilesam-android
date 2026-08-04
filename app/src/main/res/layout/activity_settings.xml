@@ -45,19 +45,11 @@
             android:orientation="vertical"
             android:paddingBottom="@dimen/spacing_l">
 
-            <!-- Current model (one rounded card) -->
-            <FrameLayout
-                android:id="@+id/currentModelCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_card" />
-
             <!-- All models (one rounded group, hairline separators) -->
             <LinearLayout
                 android:id="@+id/modelsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_l"
                 android:orientation="vertical"
                 android:background="@drawable/bg_group_card" />
 
