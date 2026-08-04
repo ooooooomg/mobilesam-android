@@ -53,10 +53,10 @@ class SettingsActivity : AppCompatActivity() {
     private fun buildDivider(): View {
         val v = View(this)
         v.layoutParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 1
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(2)
         )
         v.setBackgroundColor(
-            androidx.core.content.ContextCompat.getColor(this, R.color.outline_variant)
+            androidx.core.content.ContextCompat.getColor(this, R.color.accent_glow)
         )
         return v
     }
@@ -69,11 +69,7 @@ class SettingsActivity : AppCompatActivity() {
 
         card.findViewById<TextView>(R.id.modelCardName).text = info.friendlyName
         card.findViewById<TextView>(R.id.modelCardSub).text = info.subLabel
-        card.findViewById<TextView>(R.id.modelCardType).text = "类型 / ${info.typeLabel}"
-        card.findViewById<TextView>(R.id.modelCardPrecision).text = "精度 / ${info.precision}"
-        card.findViewById<TextView>(R.id.modelCardInput).text = "输入 / ${info.inputSize}"
-        card.findViewById<TextView>(R.id.modelCardSpeed).text = "速度 / ${info.speed}"
-        card.findViewById<TextView>(R.id.modelCardPath).text = info.pathSummary()
+        card.findViewById<TextView>(R.id.modelCardDesc).text = info.desc
 
         val detailBtn = card.findViewById<TextView>(R.id.modelCardDetail)
         detailBtn.text = "查看详情 ▸"
@@ -92,4 +88,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         return card
     }
+
+    private fun dp(v: Int): Int =
+        (v * resources.displayMetrics.density).toInt()
 }

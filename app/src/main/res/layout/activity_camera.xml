@@ -33,71 +33,71 @@
         android:paddingTop="@dimen/spacing_m"
         android:paddingBottom="@dimen/spacing_m">
 
-        <!-- Line 1: model name (tap to switch) + flip camera -->
-        <LinearLayout
-            android:id="@+id/modelPickerButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:paddingStart="@dimen/spacing_s"
-            android:paddingEnd="@dimen/spacing_s"
-            android:paddingTop="@dimen/spacing_s"
-            android:paddingBottom="@dimen/spacing_s">
-
+            <!-- Line 1: model name (tap to switch) + flip camera -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/modelPickerButton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingStart="@dimen/spacing_s"
+                android:paddingEnd="@dimen/spacing_s"
+                android:paddingTop="@dimen/spacing_s"
+                android:paddingBottom="@dimen/spacing_s">
 
-                <TextView
-                    android:id="@+id/modelTitleText"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="19sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/model_picker_default" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/modelTitleText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="19sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/model_picker_default" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/ic_expand_more"
+                    android:contentDescription="@null"
+                    app:tint="@color/accent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/flipButton"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="@dimen/spacing_s"
+                    app:icon="@drawable/ic_flip"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/accent"
+                    android:contentDescription="@string/flip_camera" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="4dp"
-                android:src="@drawable/ic_expand_more"
-                android:contentDescription="@null"
-                app:tint="@color/accent" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/flipButton"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:layout_marginStart="@dimen/spacing_s"
-                app:icon="@drawable/ic_flip"
-                app:iconSize="24dp"
-                app:iconTint="@color/accent"
-                android:contentDescription="@string/flip_camera" />
+            <!-- Line 2: FPS centered -->
+            <TextView
+                android:id="@+id/hudFps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_m"
+                android:gravity="center"
+                android:text="-- fps"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/hud_value"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif" />
         </LinearLayout>
-
-        <!-- Line 2: FPS centered -->
-        <TextView
-            android:id="@+id/hudFps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_m"
-            android:gravity="center"
-            android:text="-- fps"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/hud_value"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif" />
-    </LinearLayout>
 
     <!-- Legend: one gray chip per detected class (danmaku style) -->
     <LinearLayout
@@ -136,35 +136,35 @@
         android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
-        <ImageButton
-            android:id="@+id/tabAlbum"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/album_label"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_album" />
+            <ImageButton
+                android:id="@+id/tabAlbum"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/album_label"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_album" />
 
-        <ImageButton
-            android:id="@+id/tabSeg"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/tab_seg"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_seg" />
+            <ImageButton
+                android:id="@+id/tabSeg"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/tab_seg"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_seg" />
 
-        <ImageButton
-            android:id="@+id/tabSettings"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/tab_settings"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_settings" />
+            <ImageButton
+                android:id="@+id/tabSettings"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/tab_settings"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_settings" />
     </LinearLayout>
 
     <!-- Loading chip, visible until the pipeline is ready -->

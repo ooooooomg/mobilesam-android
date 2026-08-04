@@ -33,57 +33,13 @@
             android:fontFamily="sans-serif" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/modelCardMeta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="8dp">
-
-        <TextView
-            android:id="@+id/modelCardType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif" />
-
-        <TextView
-            android:id="@+id/modelCardPrecision"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif" />
-
-        <TextView
-            android:id="@+id/modelCardInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif" />
-
-        <TextView
-            android:id="@+id/modelCardSpeed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif" />
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/modelCardPath"
+        android:id="@+id/modelCardDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         android:textColor="@color/text_secondary"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:lineSpacingExtra="2dp"
         android:fontFamily="sans-serif" />
 
@@ -91,7 +47,7 @@
         android:id="@+id/modelCardDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:textColor="@color/accent"
         android:textSize="13sp"
         android:fontFamily="sans-serif" />
