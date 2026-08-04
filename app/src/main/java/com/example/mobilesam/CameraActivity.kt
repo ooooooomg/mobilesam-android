@@ -311,7 +311,6 @@ class CameraActivity : AppCompatActivity() {
         legendText.text = ""
         val shown = classes.distinct().take(3)
         shown.forEachIndexed { i, cls ->
-            val color = MaskComposer.colorForClass(cls)
             val chip = android.widget.TextView(this).apply {
                 text = "● ${CocoLabels.chineseFor(cls)}"
                 textSize = 16f
