@@ -141,23 +141,23 @@ class YoloSegSegmenter(
         val boxes = post.nms(raw.map { it.box }, nmsThreshold)
         val tDet = System.currentTimeMillis() - t0
 
-        // Index raw anchors by input-space rounded top-left so the surviving
-        // boxes can find their mask coefficients in O(1) instead of a linear
-        // scan over every anchor (NMS can leave thousands of candidates).
+        // Index raw anchors by exact input-space top-left (float bit pattern)
+        // so surviving boxes find their mask coefficients in O(1). Using raw
+        // float bits (not rounding) avoids two anchors colliding on the same key.
         val anchorByKey = HashMap<Long, Int>(raw.size)
         for (item in raw) {
-            val bx = (item.box.x1 * scale).toInt()
-            val by = (item.box.y1 * scale).toInt()
-            anchorByKey[(by.toLong() shl 32) or (bx.toLong() and 0xFFFFFFFFL)] = item.anchor
+            val kx = (item.box.x1 * scale).toRawBits()
+            val ky = (item.box.y1 * scale).toRawBits()
+            anchorByKey[(ky.toLong() shl 32) or (kx.toLong() and 0xFFFFFFFFL)] = item.anchor
         }
 
         // Rebuild a box-local mask per surviving box.
         val masks = ArrayList<SamMaskDecoder.SegmentedMask>(boxes.size)
         for (box in boxes) {
             if (box.x2 - box.x1 < 5f || box.y2 - box.y1 < 5f) continue
-            val bx = (box.x1 * scale).toInt()
-            val by = (box.y1 * scale).toInt()
-            val anchor = anchorByKey[(by.toLong() shl 32) or (bx.toLong() and 0xFFFFFFFFL)] ?: continue
+            val kx = (box.x1 * scale).toRawBits()
+            val ky = (box.y1 * scale).toRawBits()
+            val anchor = anchorByKey[(ky.toLong() shl 32) or (kx.toLong() and 0xFFFFFFFFL)] ?: continue
             masks.add(rebuildMask(box, anchor, dA, pA, nAnchors, nCoeff, protoH, protoW, scale))
         }
         val tMask = System.currentTimeMillis() - t0

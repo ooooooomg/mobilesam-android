@@ -87,15 +87,14 @@ class InferencePipeline(
     /**
      * Swap the active segmenter. Runs on the same lock as [onFrame]/[runSingle]
      * so the old segmenter is never mid-run when closed. The old segmenter's
-     * sessions are released inside the lock; GC hint helps the peak-memory
-     * window during a switch.
+     * sessions are released inside the lock; no explicit GC here — it would
+     * stall the analyzer thread on the hot path.
      */
     @Synchronized
     fun switchSegmenter(newSegmenter: Segmenter) {
         val old = segmenter
         segmenter = newSegmenter
         old.close()
-        System.gc()
     }
 
     @Synchronized

@@ -46,7 +46,9 @@ class DetPostprocess(private val inputSize: Int) {
                 c[dstRow + x] = px[srcRow + x]
             }
         }
-        resized.recycle()
+        // createScaledBitmap returns the ORIGINAL bitmap when the size is
+        // unchanged; recycling it would destroy the caller's frame.
+        if (resized !== bitmap) resized.recycle()
 
         // Convert ARGB to NCHW float (RGB / 255.0)
         val input = input ?: FloatArray(3 * inputSize * inputSize).also { this.input = it }

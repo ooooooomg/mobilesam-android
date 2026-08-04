@@ -416,6 +416,10 @@ class CameraActivity : AppCompatActivity() {
                 legendText.text = getString(R.string.processing_failed) + ": ${e.message ?: e.javaClass.simpleName}"
                 legendPanel.visibility = View.VISIBLE
             }
+        } catch (e: OutOfMemoryError) {
+            // Never crash the app on a heavy frame; skip it and let GC recover.
+            android.util.Log.e("MobileSAM", "analyzeFrame OOM", e)
+            System.gc()
         } finally {
             bitmap?.recycle()
             image.close()

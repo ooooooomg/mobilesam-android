@@ -22,7 +22,7 @@ class TwoStageSegmenter(
     }
 
     private var cachedEmbedding: FloatArray? = null
-    private var cachedPrep: SamImageEncoder.Preprocessed? = null
+    private var cachedScale = 1f
     private var frameCounter = 0
 
     override fun segmentStreaming(source: Bitmap): SegmentationOutput {
@@ -33,12 +33,10 @@ class TwoStageSegmenter(
         val boxes = yolo.detect(source)
         val tYolo = System.currentTimeMillis() - start
 
-        var prep = cachedPrep
         if (encodeThis || cachedEmbedding == null) {
             val (emb, p) = encoder.encode(source)
             cachedEmbedding = emb
-            cachedPrep = p
-            prep = p
+            cachedScale = p.scale
         }
         val embedding = cachedEmbedding
         val tEnc = System.currentTimeMillis() - start - tYolo
@@ -49,9 +47,10 @@ class TwoStageSegmenter(
         val srcW = source.width
         val srcH = source.height
         if (ready) {
+            val scale = cachedScale
             for (box in boxes) {
                 if (box.x2 - box.x1 < 5f || box.y2 - box.y1 < 5f) continue
-                masks.add(decoder.decode(embedding!!, box, prep!!.scale, srcW, srcH))
+                masks.add(decoder.decode(embedding!!, box, scale, srcW, srcH))
             }
         }
         val tDec = System.currentTimeMillis() - tDec0

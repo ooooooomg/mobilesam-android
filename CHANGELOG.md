@@ -2,6 +2,21 @@
 
 本项目的所有显著变更按时间倒序记录。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [1.0.4] - 2026-08-04
+
+### 修复（鲁棒性审查后）
+
+- **修复 use-after-recycle 崩溃**：letterbox 尺寸未变时 `createScaledBitmap` 返回源帧，误 recycle 导致每帧崩溃，改为仅回收新建位图
+- **OOM 不再崩溃**：analyzeFrame 捕获 `OutOfMemoryError`，跳过重帧让 GC 恢复
+- **修复 mask anchor 匹配错位**：YOLO-seg 的 anchor 查找 key 从"取整坐标"改为"float 位模式"，避免多个 anchor 撞 key 取到错误掩码系数
+- **tensor 泄漏修复**：SamMaskDecoder 的 session.run 异常时也释放输入 tensor（try/finally）
+- **移除锁内 System.gc()**：模型切换不再拖慢 analyzer 线程
+
+### 优化
+
+- MaskComposer 无检测结果时跳过全帧 copy
+- TwoStage 只缓存 scale 而非整个 1.7MB 预处理输入
+
 ## [1.0.3] - 2026-08-04
 
 ### 修复

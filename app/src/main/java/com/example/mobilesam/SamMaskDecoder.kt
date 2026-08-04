@@ -97,20 +97,28 @@ class SamMaskDecoder(
             "has_mask_input" to OnnxTensor.createTensor(environment, java.nio.FloatBuffer.wrap(hasMask), longArrayOf(1)),
             "orig_im_size" to OnnxTensor.createTensor(environment, java.nio.FloatBuffer.wrap(origSize), longArrayOf(2)),
         )
-        val results = session.run(tensors)
-        tensors.values.forEach { it.close() }
+        // Always release input tensors even if the session run throws.
+        var results: ai.onnxruntime.OrtSession.Result? = null
+        try {
+            results = session.run(tensors)
+        } finally {
+            tensors.values.forEach { it.close() }
+        }
+        val run = results!!
 
         // Outputs: masks (1,1,H,W), iou_predictions (1,1), low_res_masks.
         // Result.get(int) returns OnnxValue; cast to OnnxTensor (not .value).
-        val masks = results.get(0) as OnnxTensor
-        val scores = results.get(1) as OnnxTensor
+        val masks = run.get(0) as OnnxTensor
+        val scores = run.get(1) as OnnxTensor
         val maskFloat = masks.floatBuffer ?: throw IllegalStateException("bad mask output")
         val scoreFloat = scores.floatBuffer ?: throw IllegalStateException("bad score output")
+        // Fresh array per call: several boxes' masks accumulate in a list and
+        // share one buffer, so reuse would make every mask identical.
         val maskArr = FloatArray(maskFloat.capacity())
         maskFloat.rewind(); maskFloat.get(maskArr)
         val score = scoreFloat.get(0)
         masks.close(); scores.close()
-        results.close()
+        run.close()
 
         return SegmentedMask(maskArr, origW, origH, score)
     }

@@ -36,6 +36,10 @@ object MaskComposer {
     ): Bitmap {
         val w = source.width
         val h = source.height
+        // No detections: skip the full-frame copy entirely.
+        if (masks.isEmpty() && boxes.isEmpty()) {
+            return source.copy(Bitmap.Config.ARGB_8888, true)
+        }
         val result = source.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
         drawMasks(canvas, masks, w, h)
