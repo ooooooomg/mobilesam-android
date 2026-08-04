@@ -37,14 +37,14 @@ class SettingsActivity : AppCompatActivity() {
             ?: ModelRegistry.default()
 
         val currentCard = findViewById<FrameLayout>(R.id.currentModelCard)
-        currentCard.addView(buildModelCard(current, current = true))
+        currentCard.addView(buildModelCard(current))
 
         val container = findViewById<LinearLayout>(R.id.modelsContainer)
         ModelRegistry.models.forEachIndexed { index, info ->
             if (index > 0) {
                 container.addView(buildDivider())
             }
-            container.addView(buildModelCard(info, current = false))
+            container.addView(buildModelCard(info))
         }
 
         findViewById<View>(R.id.settingsBack).setOnClickListener { finish() }
@@ -61,31 +61,17 @@ class SettingsActivity : AppCompatActivity() {
         return v
     }
 
-    private fun buildModelCard(info: ModelRegistry.ModelInfo, current: Boolean): View {
+    private fun buildModelCard(info: ModelRegistry.ModelInfo): View {
         val inflater = LayoutInflater.from(this)
         val card = inflater.inflate(
             R.layout.item_model_card, null, false
         ) as LinearLayout
 
         card.findViewById<TextView>(R.id.modelCardName).text = info.friendlyName
-        card.findViewById<TextView>(R.id.modelCardSub).text = info.subLabel
-        card.findViewById<TextView>(R.id.modelCardDesc).text = info.desc
 
         val detailBtn = card.findViewById<TextView>(R.id.modelCardDetail)
         detailBtn.text = "查看详情 ▸"
         detailBtn.setOnClickListener { ModelDetailActivity.start(this, info) }
-
-        if (current) {
-            val runtime = inflater.inflate(
-                R.layout.item_runtime_line, card, false
-            ) as TextView
-            runtime.text = getString(
-                R.string.current_runtime_format,
-                info.inputSize, info.inputSize, 4, 1,
-                Runtime.getRuntime().availableProcessors(),
-            )
-            card.addView(runtime)
-        }
         return card
     }
 

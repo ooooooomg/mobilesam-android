@@ -22,7 +22,6 @@
     <string name="section_current_model">当前模型</string>
     <string name="section_all_models">全部模型</string>
     <string name="section_about">关于与开源</string>
-    <string name="current_runtime_format">输入 %1$d × %2$d    线程 %3$d / %4$d    内核 %5$d</string>
     <string name="model_detail_title">模型详情</string>
     <string name="detail_section_overview">架构与指标</string>
     <string name="detail_section_scenarios">适用场景</string>

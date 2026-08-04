@@ -2,52 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
     android:paddingTop="14dp"
     android:paddingBottom="14dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/modelCardName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text_primary"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif" />
-
-        <TextView
-            android:id="@+id/modelCardSub"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif" />
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/modelCardDesc"
-        android:layout_width="match_parent"
+        android:id="@+id/modelCardName"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/text_secondary"
-        android:textSize="13sp"
-        android:lineSpacingExtra="2dp"
+        android:layout_weight="1"
+        android:textColor="@color/text_primary"
+        android:textSize="17sp"
+        android:textStyle="bold"
         android:fontFamily="sans-serif" />
 
     <TextView
         android:id="@+id/modelCardDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:textColor="@color/accent"
         android:textSize="13sp"
         android:fontFamily="sans-serif" />
