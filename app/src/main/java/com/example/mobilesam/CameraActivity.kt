@@ -70,20 +70,6 @@ class CameraActivity : AppCompatActivity() {
         legendPanel = findViewById(R.id.legendPanel)
         loadingChip = findViewById(R.id.loadingChip)
 
-        // TextureView renders into its own surface layer, so an ancestor's
-        // clipPath can't round its corners. Force a hardware layer so the
-        // content is composited into the view's own layer, which the rounded
-        // outline can then clip.
-        val cornerPx = resources.getDimension(R.dimen.app_corner)
-        val roundedOutline = object : android.view.ViewOutlineProvider() {
-            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, cornerPx)
-            }
-        }
-        previewView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
-        previewView.outlineProvider = roundedOutline
-        previewView.clipToOutline = true
-
         overlayView.isClickable = false
 
         setupModelPicker()
@@ -361,14 +347,11 @@ class CameraActivity : AppCompatActivity() {
                 val provider = providerFuture.get()
 
                 // Use the transparent TextureView implementation so the
-                // OverlayView's backdrop gradient (and the letterbox band)
-                // shows through instead of the SurfaceView's opaque black.
+                // overlay's mask shows through cleanly.
                 previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                // Both preview and analysis stream at 4:3 so the overlay (an
-                // opaque copy of the 4:3 analysis frame) aligns with the preview.
-                // FIT_CENTER shows the whole 4:3 frame, centered, with the
-                // theme gradient visible above/below.
-                previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
+                // FILL_CENTER crop-fills the screen (no letterbox bands); the
+                // overlay applies the same crop transform below so masks align.
+                previewView.scaleType = PreviewView.ScaleType.FILL_CENTER
 
                 val preview = Preview.Builder()
                     .setTargetResolution(android.util.Size(480, 360))
@@ -470,8 +453,6 @@ class OverlayView @JvmOverloads constructor(
 
     private var overlay: Bitmap? = null
     private val paint = Paint().apply { isFilterBitmap = true }
-    private val bgPaint = Paint()
-    private var bgShader: android.graphics.Shader? = null
 
     /** The previous overlay bitmap is recycled; the caller creates fresh ones. */
     fun setResult(bmp: Bitmap) {
@@ -487,33 +468,16 @@ class OverlayView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Dark gradient backdrop, so the letterbox band above/below the 4:3
-        // frame shows the theme gradient instead of the raw black surface.
-        if (bgShader == null || width != bgShaderWidth || height != bgShaderHeight) {
-            bgShader = android.graphics.LinearGradient(
-                0f, 0f, 0f, height.toFloat(),
-                intArrayOf(
-                    ContextCompat.getColor(context, R.color.bg_top),
-                    ContextCompat.getColor(context, R.color.bg_bottom),
-                ),
-                null,
-                android.graphics.Shader.TileMode.CLAMP,
-            )
-            bgShaderWidth = width
-            bgShaderHeight = height
-        }
-        bgPaint.shader = bgShader
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
-
         overlay?.let { bmp ->
-            // Fit-center: keep aspect ratio, center within the view.
-            // Mirrors PreviewView's scale so the overlay aligns with the feed.
+            // Center-crop: scale so the 4:3 analysis frame fills the screen,
+            // cropping the longer dimension. Mirrors PreviewView's FILL_CENTER
+            // so masks stay aligned with the feed.
             val vw = width.toFloat()
             val vh = height.toFloat()
             val bmpW = bmp.width.toFloat()
             val bmpH = bmp.height.toFloat()
             if (bmpW <= 0f || bmpH <= 0f) return
-            val scale = minOf(vw / bmpW, vh / bmpH)
+            val scale = maxOf(vw / bmpW, vh / bmpH)
             val dw = bmpW * scale
             val dh = bmpH * scale
             val left = (vw - dw) / 2f
@@ -526,7 +490,4 @@ class OverlayView @JvmOverloads constructor(
             )
         }
     }
-
-    private var bgShaderWidth = 0
-    private var bgShaderHeight = 0
 }
