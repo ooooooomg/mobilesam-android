@@ -42,7 +42,6 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var topBar: View
     private lateinit var modelPickerButton: View
     private lateinit var modelTitleText: TextView
-    private lateinit var modelSubText: TextView
     private lateinit var hudFps: TextView
     private lateinit var legendText: TextView
     private lateinit var legendPanel: View
@@ -64,7 +63,6 @@ class CameraActivity : AppCompatActivity() {
         topBar = findViewById(R.id.topBar)
         modelPickerButton = findViewById(R.id.modelPickerButton)
         modelTitleText = findViewById(R.id.modelTitleText)
-        modelSubText = findViewById(R.id.modelSubText)
         hudFps = findViewById(R.id.hudFps)
         legendText = findViewById(R.id.legendText)
         legendPanel = findViewById(R.id.legendPanel)
@@ -187,7 +185,6 @@ class CameraActivity : AppCompatActivity() {
                 runOnUiThread {
                     loadingChip.visibility = View.GONE
                     modelTitleText.text = info.friendlyName
-                    modelSubText.text = info.subLabel
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MobileSAM", "model load failed", e)
@@ -212,7 +209,6 @@ class CameraActivity : AppCompatActivity() {
     private fun setupModelPicker() {
         val info = selectedModel()
         modelTitleText.text = info.friendlyName
-        modelSubText.text = info.subLabel
         modelPickerButton.setOnClickListener {
             ModelPickerDialog(
                 this,
@@ -245,7 +241,6 @@ class CameraActivity : AppCompatActivity() {
                 runOnUiThread {
                     loadingChip.visibility = View.GONE
                     modelTitleText.text = info.friendlyName
-                    modelSubText.text = info.subLabel
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MobileSAM", "model switch failed", e)

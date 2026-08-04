@@ -63,15 +63,6 @@
                     android:textStyle="bold"
                     android:fontFamily="sans-serif"
                     android:text="@string/model_picker_default" />
-
-                <TextView
-                    android:id="@+id/modelSubText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif" />
             </LinearLayout>
 
             <ImageView

@@ -28,7 +28,8 @@
     <color name="accent_glow">#269FA8DA</color>
     <color name="text_primary">#E8EAF6</color>
     <color name="text_secondary">#9AA0A6</color>
-    <color name="bar_fill">#B32B2B3B</color>
+    <color name="bar_fill">#8C2B2B3B</color>
+    <color name="bar_gloss">#66FFFFFF</color>
     <color name="bar_border">#4D9FA8DA</color>
     <color name="panel_body">#F2141A21</color>
     <color name="panel_border">#269FA8DA</color>
