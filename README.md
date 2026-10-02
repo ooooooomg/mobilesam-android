@@ -45,14 +45,14 @@
 
 | 文件 | 大小 | 说明 |
 |---|---|---|
-| `mobile_sam_encoder.onnx` | 27MB | MobileSAM TinyViT 图像编码器 |
+| `mobile_sam_encoder.onnx` | 27MB | MobileSAM TinyViT 图像编码器(输入 384×384) |
 | `mobile_sam_decoder.onnx` | 16MB | MobileSAM mask decoder |
-| `yolov8n.onnx` | 13MB | YOLOv8n 检测器（两段式 prompt 用） |
-| `picodet_s_320_coco.onnx` | 4MB | PP-PicoDet-S 轻量检测器（非 YOLO） |
-| `yolo11n-384.onnx` | 11MB | YOLO11n 纯检测（384） |
-| `yolo11n-seg-384.onnx` | 12MB | YOLO11n-seg 分割（384） |
-| `yolo11n-seg-384-int8.onnx` | 3.4MB | YOLO11n-seg 分割（384，INT8 量化） |
-| `yolo11n-seg.onnx` | 12MB | YOLO11n-seg 分割（640） |
+| `yolov8n.onnx` | 13MB | YOLOv8n 检测器（两段式 prompt 用,输入 480×480） |
+| `picodet_s_320_coco.onnx` | 4MB | PP-PicoDet-S 轻量检测器（非 YOLO,输入 320×320） |
+| `yolo11n-384.onnx` | 11MB | YOLO11n 纯检测（输入 384×384） |
+| `yolo11n-seg-384.onnx` | 12MB | YOLO11n-seg 分割（输入 384×384） |
+| `yolo11n-seg-384-int8.onnx` | 3.4MB | YOLO11n-seg 分割（输入 384×384,INT8 量化） |
+| `yolo11n-seg.onnx` | 12MB | YOLO11n-seg 分割（输入 640×640） |
 
 ## 代码结构
 

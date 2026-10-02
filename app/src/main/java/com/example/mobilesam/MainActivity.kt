@@ -1,7 +1,5 @@
 package com.example.mobilesam
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -11,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -60,23 +57,13 @@ class MainActivity : AppCompatActivity() {
         backToCameraBtn.setOnClickListener { finish() }
 
         pickBtn.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermission.launch(Manifest.permission.READ_MEDIA_IMAGES)
-            } else {
-                pickImage.launch("image/*")
-            }
+            // SAF GetContent 不需要媒体权限,直接拉起(此前把权限当前置门槛,
+            // 用户拒绝授权后反而无法选图,与权限的实际用途自相矛盾)
+            pickImage.launch("image/*")
         }
 
         loadModels()
     }
-
-    private val requestPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) pickImage.launch("image/*")
-            else statusText.text = getString(R.string.need_image_permission)
-        }
 
     private fun loadModels() {
         statusText.text = getString(R.string.loading_models)
